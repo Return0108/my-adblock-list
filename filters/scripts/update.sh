@@ -15,12 +15,16 @@ while IFS= read -r url; do
     fi
 
     echo "下载: $url"
-    # 输出http状态码，内容写入文件
-    http_code=$(curl -sL -w "%{http_code}" -o "$OUTPUT_FILE.tmp" --connect-timeout 25 --max-time 60 "$fetch_url" || true)
+    TMP_FILE="${OUTPUT_FILE}.tmp"
+    http_code=$(curl -sL -w "%{http_code}" -o "$TMP_FILE" --connect-timeout 25 --max-time 60 "$fetch_url" || true)
     echo "状态码: $http_code"
-    cat "$OUTPUT_FILE.tmp" >> "$OUTPUT_FILE"
-    echo "" >> "$OUTPUT_FILE"
-    rm -f "$OUTPUT_FILE.tmp"
+
+    # 只有临时文件存在并且大小大于0才追加内容
+    if [ -f "$TMP_FILE" ] && [ -s "$TMP_FILE" ]; then
+      cat "$TMP_FILE" >> "$OUTPUT_FILE"
+      echo "" >> "$OUTPUT_FILE"
+    fi
+    rm -f "$TMP_FILE"
   fi
 done < "$SOURCE_FILE"
 
