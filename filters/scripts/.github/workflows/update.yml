@@ -1,0 +1,28 @@
+name: Update Filters
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # 每天 00:00 自动运行
+  workflow_dispatch:       # 手动运行按钮
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install curl
+        run: sudo apt-get update && sudo apt-get install -y curl
+
+      - name: Run update script
+        run: bash scripts/update.sh
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add filters/merged.txt
+          git commit -m "Auto-update filters"
+          git push
