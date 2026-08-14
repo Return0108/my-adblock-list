@@ -2,7 +2,7 @@ name: Update Filters
 
 on:
   schedule:
-    - cron: "0 0 * * *"   # 每天 00:00 自动运行
+    - cron: "0 16 * * *"   # 北京时间每天 00:00 自动运行
   workflow_dispatch:       # 手动运行按钮
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y curl
 
       - name: Run update script
-        run: bash scripts/update.sh
+        run: bash filters/scripts/update.sh
 
       - name: Commit and push changes
         run: |
