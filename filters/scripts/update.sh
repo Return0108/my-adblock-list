@@ -8,7 +8,6 @@ OUTPUT_FILE="filters/merged.txt"
 echo "开始合并规则"
 while IFS= read -r url; do
   if [[ -n "$url" ]]; then
-    # raw链接自动套ghproxy镜像
     if [[ "$url" == https://raw.githubusercontent.com/* ]]; then
       fetch_url="https://mirror.ghproxy.com/$url"
     else
@@ -16,9 +15,12 @@ while IFS= read -r url; do
     fi
 
     echo "下载: $url"
-    # 单条下载失败不终止脚本，继续下一条
-    curl -sL --connect-timeout 25 --max-time 60 "$fetch_url" >> "$OUTPUT_FILE" || true
+    # 输出http状态码，内容写入文件
+    http_code=$(curl -sL -w "%{http_code}" -o "$OUTPUT_FILE.tmp" --connect-timeout 25 --max-time 60 "$fetch_url" || true)
+    echo "状态码: $http_code"
+    cat "$OUTPUT_FILE.tmp" >> "$OUTPUT_FILE"
     echo "" >> "$OUTPUT_FILE"
+    rm -f "$OUTPUT_FILE.tmp"
   fi
 done < "$SOURCE_FILE"
 
